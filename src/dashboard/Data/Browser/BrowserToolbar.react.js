@@ -31,11 +31,14 @@ let BrowserToolbar = ({
   onAddColumn,
   onAddRow,
   onAddClass,
+  onAttachRows,
+  onAttachSelectedRows,
   onExport,
   onRemoveColumn,
   onDeleteRows,
   onDropClass,
   onChangeCLP,
+  onRefresh,
   hidePerms,
 
   enableDeleteAllRows,
@@ -44,14 +47,15 @@ let BrowserToolbar = ({
 }) => {
   let selectionLength = Object.keys(selection).length;
   let details = [];
-  if (!relation) {
-    if (count !== undefined) {
+  if (count !== undefined) {
       if (count === 1) {
         details.push('1 object');
       } else {
         details.push(prettyNumber(count) + ' objects');
       }
-    }
+  }
+
+  if (!relation) {
     if (perms && !hidePerms) {
       let read = perms.get && perms.find && perms.get['*'] && perms.find['*'];
       let write = perms.create && perms.update && perms.delete && perms.create['*'] && perms.update['*'] && perms.delete['*'];
@@ -69,9 +73,19 @@ let BrowserToolbar = ({
     menu = (
       <BrowserMenu title='Edit' icon='edit-solid'>
         <MenuItem
+          text={`Create ${relation.targetClassName} and attach`}
+          onClick={onAddRow}
+        />
+        <MenuItem
+          text="Attach existing row"
+          onClick={onAttachRows}
+        />
+        <Separator />
+        <MenuItem
           disabled={selectionLength === 0}
-          text={selectionLength === 1 && !selection['*'] ? 'Remove this row' : 'Remove these rows'}
-          onClick={() => onDeleteRows(selection)} />
+          text={selectionLength === 1 && !selection['*'] ? 'Detach this row' : 'Detach these rows'}
+          onClick={() => onDeleteRows(selection)}
+        />
       </BrowserMenu>
     );
   } else {
@@ -80,6 +94,12 @@ let BrowserToolbar = ({
         <MenuItem text='Add a row' onClick={onAddRow} />
         <MenuItem text='Add a column' onClick={onAddColumn} />
         <MenuItem text='Add a class' onClick={onAddClass} />
+        <Separator />
+        <MenuItem
+          disabled={!selectionLength}
+          text={`Attach ${selectionLength <= 1 ? 'this row' : 'these rows'} to relation`}
+          onClick={onAttachSelectedRows}
+        />
         <Separator />
         <MenuItem
           disabled={selectionLength === 0}
@@ -102,9 +122,17 @@ let BrowserToolbar = ({
   }
   return (
     <Toolbar
+      relation={relation}
+      filters={filters}
       section={relation ? `Relation <${relation.targetClassName}>` : 'Class'}
       subsection={subsection}
-      details={details.join(' \u2022 ')}>
+      details={details.join(' \u2022 ')}
+    >
+      <a className={styles.toolbarButton} onClick={onRefresh}>
+        <Icon name='refresh-solid' width={14} height={14} />
+        <span>Refresh</span>
+      </a>
+      <div className={styles.toolbarSeparator} />
       <BrowserFilter
         setCurrent={setCurrent}
         schema={schema}

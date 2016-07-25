@@ -18,24 +18,17 @@ const AppsManager = {
   },
 
   apps() {
+    appsStore.sort(function(app1, app2) {
+      return app1.name.localeCompare(app2.name);
+    });
     return appsStore;
   },
 
-  findAppBySlug(slug) {
+  findAppBySlugOrName(slugOrName) {
     let apps = this.apps();
     for (let i = apps.length; i--;) {
-      if (apps[i].slug === slug) {
+      if (apps[i].slug === slugOrName || apps[i].name === slugOrName) {
         return apps[i];
-      }
-    }
-    return null;
-  },
-
-  findAppByName(name) {
-    let apps = this.apps();
-    for (let i = apps.length; i--;) {
-      if (apps[i].name === name) {
-        return apps[i]
       }
     }
     return null;
